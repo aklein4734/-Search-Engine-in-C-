@@ -18,9 +18,10 @@ int main(int argc, char* argv[]) {
 
     DumpBytes(&int_val, sizeof(int_val));
     DumpBytes(&float_val, sizeof(float_val));
-    DumpBytes(arr_unsorted, 11);
-    CopyAndSort(arr_unsorted, arr_sorted, 11);
-    DumpBytes(arr_sorted, 11);
+    DumpBytes(arr_unsorted, sizeof(arr_unsorted));
+    CopyAndSort(arr_unsorted, arr_sorted, sizeof(arr_unsorted) /
+        sizeof(uint8_t));
+    DumpBytes(arr_sorted, sizeof(arr_sorted));
 
     return EXIT_SUCCESS;
 }
@@ -41,7 +42,7 @@ void DumpBytes(void* pointer, int32_t size) {
 
 void CopyAndSort(uint8_t orignal[], uint8_t new[], int size) {
     if (size < 0) {  // sees if size is a positive int
-        fprintf(stderr, "ERROR: negitive number of bytes\n");
+        fprintf(stderr, "ERROR: negitive size of the array\n");
         return;
     }
     DumpBytes(orignal, size);
