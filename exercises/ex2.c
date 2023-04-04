@@ -44,15 +44,16 @@ void CopyAndSort(uint8_t orignal[], uint8_t new[], int size) {
         fprintf(stderr, "ERROR: negitive number of bytes\n");
         return;
     }
+    DumpBytes(orignal, size);
     for (int i = 0; i < size; i++) {  // moves the data from orignal to new
         new[i] = orignal[i];
     }
-    int8_t boolean = 0;  // indicator varible
-    while (boolean == 0) {
-        boolean = 1;
+    int8_t sorted = 0;  // indicator varible
+    while (sorted == 0) {
+        sorted = 1;
         for (int i = 0; i < (size - 1); i++) {
             if (new[i] > new[i + 1]) {  // checks for wrong ordering if so swap
-                boolean = 0;
+                sorted = 0;
                 int temp = new[i];
                 new[i] = new[i + 1];
                 new[i + 1] = temp;
