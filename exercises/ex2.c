@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
-// Dumps the number of bytes (size) at the indicated pointer 
+// Dumps the number of bytes (size) at the indicated pointer
 void DumpBytes(void* pointer, int32_t size) {
     if (size < 0) {  // sees if size is a positive int
         fprintf(stderr, "ERROR: negitive number of bytes\n");
