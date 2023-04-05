@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
+// Dumps the number of bytes (size) at the indicated pointer 
 void DumpBytes(void* pointer, int32_t size) {
     if (size < 0) {  // sees if size is a positive int
         fprintf(stderr, "ERROR: negitive number of bytes\n");
@@ -40,6 +41,9 @@ void DumpBytes(void* pointer, int32_t size) {
     printf("\n");
 }
 
+// Copys the values from the orignal array into the new array
+// the method must be provided with the size of the arrays to copy them
+// Then the method sorts the new array into accending order
 void CopyAndSort(uint8_t orignal[], uint8_t new[], int size) {
     if (size < 0) {  // sees if size is a positive int
         fprintf(stderr, "ERROR: negitive size of the array\n");
@@ -49,7 +53,7 @@ void CopyAndSort(uint8_t orignal[], uint8_t new[], int size) {
     for (int i = 0; i < size; i++) {  // moves the data from orignal to new
         new[i] = orignal[i];
     }
-    int8_t sorted = 0;  // indicator varible
+    int8_t sorted = 0;  // indicator varible to see if the array is sorted
     while (sorted == 0) {
         sorted = 1;
         for (int i = 0; i < (size - 1); i++) {
