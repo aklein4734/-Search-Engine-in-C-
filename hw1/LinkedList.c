@@ -26,7 +26,8 @@ LinkedList* LinkedList_Allocate(void) {
   Verify333(ll != NULL);
 
   // STEP 1: initialize the newly allocated record structure.
-
+  LinkedList temp = {0, NULL, NULL};
+  *ll = temp;
   // Return our newly minted linked list.
   return ll;
 }
@@ -39,7 +40,11 @@ void LinkedList_Free(LinkedList *list,
   // STEP 2: sweep through the list and free all of the nodes' payloads
   // (using the payload_free_function supplied as an argument) and
   // the nodes themselves.
-
+  LinkedListNode* temp = list->head;
+  while (temp != NULL){
+    payload_free_function(temp->payload);
+    temp = temp->next;
+  } 
   // free the LinkedList
   free(list);
 }
@@ -68,6 +73,12 @@ void LinkedList_Push(LinkedList *list, LLPayload_t payload) {
     list->num_elements = 1;
   } else {
     // STEP 3: typical case; list has >=1 elements
+    Verify333(list->head != NULL);
+    ln->next = list->head;
+    ln->prev = NULL;
+    ln->next->prev = ln;
+    list->head = ln;
+    list->num_elements++;
   }
 }
 
@@ -82,6 +93,24 @@ bool LinkedList_Pop(LinkedList *list, LLPayload_t *payload_ptr) {
   // Be sure to call free() to deallocate the memory that was
   // previously allocated by LinkedList_Push().
 
+  // Allocate space for the new node.
+  LinkedListNode *ln = (LinkedListNode *) malloc(sizeof(LinkedListNode));
+  Verify333(ln != NULL);
+
+  // Set the payload
+  ln->payload = *payload_ptr;
+  if (list->num_elements == 0){
+    return false;
+  }
+  *payload_ptr = list->head->payload;
+  if (list->num_elements == 1){
+    list->head = list->tail = NULL; // frees the block
+  } else {
+    list->head->next->prev = NULL;
+    list->head = list->head->next;
+  }
+  list->num_elements--;
+
   return true;  // you may need to change this return value
 }
 
@@ -91,6 +120,16 @@ void LinkedList_Append(LinkedList *list, LLPayload_t payload) {
   // STEP 5: implement LinkedList_Append.  It's kind of like
   // LinkedList_Push, but obviously you need to add to the end
   // instead of the beginning.
+  if (list->num_elements == 0) {
+    // Degenerate case; list is currently empty
+    Verify333(list->head == NULL);
+    Verify333(list->tail == NULL);
+    ln->next = ln->prev = NULL;
+    list->head = list->tail = ln;
+    list->num_elements = 1;
+  } else {
+
+  }
 }
 
 void LinkedList_Sort(LinkedList *list, bool ascending,
