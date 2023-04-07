@@ -1,3 +1,7 @@
+// Copyright 2023 Adam Klein
+// UWemail: aklein47@uw.edu
+// Name: Adam Klein
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -11,7 +15,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
     Point3d_Scale(point, 2);
-    Point3d point2 = Point3d_GetOrigin();
-    Point3d_Scale(&point2, 2);
+    Point3d origin = Point3d_GetOrigin();
+    Point3d_Scale(&origin, 2);
     free(point);
 }

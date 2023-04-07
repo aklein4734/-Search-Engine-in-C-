@@ -1,10 +1,12 @@
-
+// Copyright 2023 Adam Klein
+// UWemail: aklein47@uw.edu
+// Name: Adam Klein
 
 #include "Point3d.h"
 
 Point3d* Point3d_Allocate(int32_t x, int32_t y, int32_t z) {
     Point3d *point = (Point3d *) malloc(sizeof(Point3d));
-    if (point == NULL){
+    if (point == NULL) {
         exit(EXIT_FAILURE);
     }
     point->x = x;
@@ -13,7 +15,7 @@ Point3d* Point3d_Allocate(int32_t x, int32_t y, int32_t z) {
     return point;
 }
 
-void Point3d_Scale(Point3d* point, int32_t value){
+void Point3d_Scale(Point3d* point, int32_t value) {
     point->x = point->x * value;
     point->y = point->y * value;
     point->z = point->z * value;
