@@ -263,7 +263,6 @@ bool LLIterator_Remove(LLIterator *iter,
     payload_free_function(iter->node->payload);
     free(iter->node);
     iter->list->head = iter->list->tail = NULL;
-    return false;
   } 
   iter->node = iter->node->next;
   LLPayload_t trash;
@@ -275,9 +274,10 @@ bool LLIterator_Remove(LLIterator *iter,
     payload_free_function(trash);
   } else {
     payload_free_function(iter->node->prev->payload);
-    free(iter->node->prev);
+    LinkedListNode* node = iter->node->prev;
     iter->node->prev->prev->next = iter->node;
     iter->node->prev = iter->node->prev->prev;
+    free(node);
   }
   
   return LLIterator_IsValid(iter);  // you may need to change this return value
