@@ -223,14 +223,11 @@ bool LLIterator_Next(LLIterator *iter) {
   // you succeed, false otherwise
   // Note that if the iterator is already at the last node,
   // you should move the iterator past the end of the list
-  if (iter->list == NULL || iter->node == NULL) {
-    return false;
-  }
-  if (iter->node->next == NULL) {
-    return false;
-  }
   iter->node = iter->node->next;
-  return LLIterator_IsValid(iter);  // you may need to change this return value
+  if (iter->node == NULL) {
+    return false;
+  }
+  return true;  // you may need to change this return value
 }
 
 void LLIterator_Get(LLIterator *iter, LLPayload_t *payload) {
@@ -269,12 +266,12 @@ bool LLIterator_Remove(LLIterator *iter,
     return false;
   } 
   iter->node = iter->node->next;
-  LLPayload_t* trash;
+  LLPayload_t trash;
   if (iter->node->prev == iter->list->head) {
-    LinkedList_Pop(iter->list, trash);
+    LinkedList_Pop(iter->list, &trash);
     payload_free_function(trash);
   } else if (iter->node == NULL) {
-    LinkedList_Slice(iter->list, trash);
+    LinkedList_Slice(iter->list, &trash);
     payload_free_function(trash);
   } else {
     payload_free_function(iter->node->prev->payload);
