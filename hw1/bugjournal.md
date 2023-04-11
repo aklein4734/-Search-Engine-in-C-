@@ -23,7 +23,7 @@
 - I might not doing enough cheaks which is causing the problem
 
 ## C) How you fixed the bug and why the fix was necessary
-- 
+- I missread the spec and had to redo my whole iterator
 
 
 # Bug 3

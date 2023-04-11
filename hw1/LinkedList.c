@@ -259,22 +259,25 @@ bool LLIterator_Remove(LLIterator *iter,
   if (iter->list == NULL || iter->node == NULL || 
       iter->list->head == NULL || iter->list->tail == NULL) {
     return false;
-  } else if (iter->node == iter->list->head && iter->node == iter->list->tail) {
-    payload_free_function(iter->node->payload);
+  } 
+  LinkedListNode* node = iter->node;
+  LLPayload_t trash = node->payload;
+  if (iter->node == iter->list->head && iter->node == iter->list->tail) {
+    payload_free_function(trash);
     free(iter->node);
     iter->list->head = iter->list->tail = NULL;
-  } 
-  iter->node = iter->node->next;
-  LLPayload_t trash;
-  if (iter->node->prev == iter->list->head) {
+    iter->node = NULL;
+  } else if (node == iter->list->head) {
+    iter->node = iter->node->next;
     LinkedList_Pop(iter->list, &trash);
     payload_free_function(trash);
-  } else if (iter->node == NULL) {
+  } else if (node == iter->list->tail) {
+    iter->node = iter->node->prev;
     LinkedList_Slice(iter->list, &trash);
     payload_free_function(trash);
   } else {
+    iter->node = iter->node->next;
     payload_free_function(iter->node->prev->payload);
-    LinkedListNode* node = iter->node->prev;
     iter->node->prev->prev->next = iter->node;
     iter->node->prev = iter->node->prev->prev;
     free(node);

@@ -14,6 +14,7 @@
 
 #include <stdbool.h>    // for bool type (true, false)
 #include <stdint.h>     // for uint64_t, etc.
+#include "LinkedList.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // A HashTable is a automatically-resizing chained hash table.
@@ -257,5 +258,7 @@ bool HTIterator_Get(HTIterator *iter, HTKeyValue_t *keyvalue);
 //   iterator is past the end of the table, the iterator is
 //   now invalid.
 bool HTIterator_Remove(HTIterator *iter, HTKeyValue_t *keyvalue);
+
+static void Find_Node(HTKey_t key, LLIterator *iter, HTKeyValue_t *payload);
 
 #endif  // HW1_HASHTABLE_H_

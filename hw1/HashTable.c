@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 #include "CSE333.h"
+#include "LinkedList.h"
 #include "HashTable.h"
 #include "HashTable_priv.h"
 
@@ -136,7 +137,26 @@ bool HashTable_Insert(HashTable *table,
   // and optionally remove a key within a chain, rather than putting
   // all that logic inside here.  You might also find that your helper
   // can be reused in steps 2 and 3.
-
+  LLIterator *iter = LLIterator_Allocate(chain);
+  HTKeyValue_t *payload = NULL;
+  if (!LLIterator_IsValid(iter)) {
+    LinkedList_Append(chain, &newkeyvalue);
+    table->num_elements++;
+    return false;
+  }
+  Find_Node(newkeyvalue.key, iter, payload);
+  if (payload == NULL) {
+    return false;
+  } else if (payload->key == newkeyvalue.key) {
+    oldkeyvalue->key = newkeyvalue.key;
+    oldkeyvalue->value = newkeyvalue.value;
+    return true;
+  } else {
+    LinkedList_Append(chain, &newkeyvalue);
+    table->num_elements++;
+    return false;
+  }
+  LLIterator_Free(iter);
   return 0;  // you may need to change this return value
 }
 
@@ -146,7 +166,18 @@ bool HashTable_Find(HashTable *table,
   Verify333(table != NULL);
 
   // STEP 2: implement HashTable_Find.
-
+  int bucket = HashKeyToBucketNum(table, key);
+  LinkedList *chain = table->buckets[bucket];
+  LLIterator *iter = LLIterator_Allocate(chain);
+  HTKeyValue_t *payload;
+  Find_Node(key, iter, payload);
+  if (payload->key == key) {
+    keyvalue->key = key;
+    keyvalue->value = payload->value;
+    LLIterator_Free(iter);
+    return true;
+  }
+  LLIterator_Free(iter);
   return false;  // you may need to change this return value
 }
 
@@ -156,7 +187,19 @@ bool HashTable_Remove(HashTable *table,
   Verify333(table != NULL);
 
   // STEP 3: implement HashTable_Remove.
-
+  int bucket = HashKeyToBucketNum(table, key);
+  LinkedList *chain = table->buckets[bucket];
+  LLIterator *iter = LLIterator_Allocate(chain);
+  HTKeyValue_t *payload;
+  Find_Node(key, iter, payload);
+  if (payload->key == key) {
+    keyvalue->key = key;
+    keyvalue->value = payload->value;
+    LLIterator_Remove(iter, free);
+    LLIterator_Free(iter);
+    return true;
+  }
+  LLIterator_Free(iter);
   return 0;  // you may need to change this return value
 }
 
@@ -288,4 +331,11 @@ static void MaybeResize(HashTable *ht) {
   // Done!  Clean up our iterator and temporary table.
   HTIterator_Free(it);
   HashTable_Free(newht, &HTNoOpFree);
+}
+
+static void Find_Node(HTKey_t key, LLIterator *iter, HTKeyValue_t *payload) {
+  LLIterator_Get(iter, payload);
+  while (LLIterator_Next(iter) && key != payload->key) {
+    LLIterator_Get(iter, payload);
+  }
 }
