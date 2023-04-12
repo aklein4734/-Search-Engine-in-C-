@@ -265,6 +265,7 @@ bool LLIterator_Remove(LLIterator *iter,
   if (iter->node == iter->list->head && iter->node == iter->list->tail) {
     payload_free_function(trash);
     free(iter->node);
+    iter->list->num_elements = 0;
     iter->list->head = iter->list->tail = NULL;
     iter->node = NULL;
   } else if (node == iter->list->head) {
@@ -277,6 +278,7 @@ bool LLIterator_Remove(LLIterator *iter,
     payload_free_function(trash);
   } else {
     iter->node = iter->node->next;
+    iter->list->num_elements--;
     payload_free_function(iter->node->prev->payload);
     iter->node->prev->prev->next = iter->node;
     iter->node->prev = iter->node->prev->prev;

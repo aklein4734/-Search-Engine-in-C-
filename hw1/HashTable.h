@@ -259,6 +259,6 @@ bool HTIterator_Get(HTIterator *iter, HTKeyValue_t *keyvalue);
 //   now invalid.
 bool HTIterator_Remove(HTIterator *iter, HTKeyValue_t *keyvalue);
 
-bool Find_Node(HTKey_t key, LLIterator *iter, HTKeyValue_t *payload);
+bool Find_Node(HTKey_t key, LLIterator *iter);
 
 #endif  // HW1_HASHTABLE_H_
