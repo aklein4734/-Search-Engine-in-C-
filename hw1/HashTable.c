@@ -139,17 +139,24 @@ bool HashTable_Insert(HashTable *table,
   // can be reused in steps 2 and 3.
   LLIterator *iter = LLIterator_Allocate(chain);
   HTKeyValue_t payload;
+  HTKeyValue_t* payload_yes = &payload;
   if (!LLIterator_IsValid(iter)) {
     printf("first\n");
+    printf("%p \n", newkeyvalue.value);
+    printf("%p \n", &newkeyvalue);
+    payload = newkeyvalue;
     LinkedList_Append(chain, &newkeyvalue);
     table->num_elements++;
     LLIterator_Free(iter);
     return false;
   }
   if (Find_Node(newkeyvalue.key, iter, &payload)) {
-    printf("%x \n", newkeyvalue.key);
-    oldkeyvalue->key = newkeyvalue.key;
-    oldkeyvalue->value = newkeyvalue.value;
+    printf("%p\n", payload.value);
+    LLIterator_Get(iter, &payload_yes);
+    printf("%p\n", payload_yes);
+    printf("%p\n", (HTValue_t) payload_yes->value);
+    oldkeyvalue->value = payload_yes->value;
+    *payload_yes = newkeyvalue;
     LLIterator_Free(iter);
     return true;
   } else {
@@ -340,9 +347,12 @@ bool Find_Node(HTKey_t key, LLIterator *iter, HTKeyValue_t *payload) {
   while (LLIterator_IsValid(iter)) {
     LLIterator_Get(iter, &payload);
     printf("%d\n", key);
-    printf("%d\n", payload->key);
+    printf("%p\n", payload->value);
     if (key == payload->key) {
       printf("key found\n");
+      printf("%p\n", payload);
+      HTKeyValue_t temp = *payload;
+      *payload = temp;
       return true;
     }
     LLIterator_Next(iter);
