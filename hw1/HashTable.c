@@ -138,25 +138,28 @@ bool HashTable_Insert(HashTable *table,
   // all that logic inside here.  You might also find that your helper
   // can be reused in steps 2 and 3.
   LLIterator *iter = LLIterator_Allocate(chain);
-  HTKeyValue_t *payload = NULL;
+  HTKeyValue_t payload;
   if (!LLIterator_IsValid(iter)) {
+    printf("first\n");
     LinkedList_Append(chain, &newkeyvalue);
     table->num_elements++;
+    LLIterator_Free(iter);
     return false;
   }
-  Find_Node(newkeyvalue.key, iter, payload);
-  if (payload == NULL) {
-    return false;
-  } else if (payload->key == newkeyvalue.key) {
+  if (Find_Node(newkeyvalue.key, iter, &payload)) {
+    printf("%x \n", newkeyvalue.key);
     oldkeyvalue->key = newkeyvalue.key;
     oldkeyvalue->value = newkeyvalue.value;
+    LLIterator_Free(iter);
     return true;
   } else {
     LinkedList_Append(chain, &newkeyvalue);
     table->num_elements++;
+    LLIterator_Free(iter);
+    oldkeyvalue->key = newkeyvalue.key;
+    oldkeyvalue->value = newkeyvalue.value;
     return false;
   }
-  LLIterator_Free(iter);
   return 0;  // you may need to change this return value
 }
 
@@ -333,9 +336,17 @@ static void MaybeResize(HashTable *ht) {
   HashTable_Free(newht, &HTNoOpFree);
 }
 
-static void Find_Node(HTKey_t key, LLIterator *iter, HTKeyValue_t *payload) {
-  LLIterator_Get(iter, payload);
-  while (LLIterator_Next(iter) && key != payload->key) {
-    LLIterator_Get(iter, payload);
+bool Find_Node(HTKey_t key, LLIterator *iter, HTKeyValue_t *payload) {
+  while (LLIterator_IsValid(iter)) {
+    LLIterator_Get(iter, &payload);
+    printf("%d\n", key);
+    printf("%d\n", payload->key);
+    if (key == payload->key) {
+      printf("key found\n");
+      return true;
+    }
+    LLIterator_Next(iter);
   }
+  printf("done\n");
+  return false;
 }
