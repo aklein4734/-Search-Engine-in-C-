@@ -9,7 +9,7 @@
 - Or possibly I am not doing enough false malloc cheaks
 
 ## C) How you fixed the bug and why the fix was necessary
-- I freed the pointer too early once I moved the free() to the end of the function it worked.
+- I freed the pointer too early and once I moved the free() to the end of the function it worked.
 
 
 # Bug 2
@@ -29,12 +29,12 @@
 # Bug 3
 
 ## A) How is your program acting differently than you expect it to?
-- 
+- My HTIterator_IsValid() is returning the wrong value
 
 ## B) Brainstorm a few possible causes of the bug
-- 
-- 
-- 
+- My HTIterator_Next() function is not working so my vaild funciton is wrong
+- My HTIterator_IsValid() might not be robust enough to handle what I am soposed to do
+- It could be a misread spec that is returning wrong
 
 ## C) How you fixed the bug and why the fix was necessary
 - 
