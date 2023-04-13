@@ -23,6 +23,19 @@
 //
 #define INVALID_IDX -1
 
+// Inrements the LLIterator untils it finds the inputed key on one
+// of the nodes and returns the iterator, but if the key does not exist
+// in the List then the function returns an invalid iterator
+//
+// Arguments:
+// - iter: the iterator to fetch the (key,value) from.  Must be non-NULL.
+// - key: the key that the iterator is surching for
+//
+// Returns:
+// - false: if the iterator did not find the key
+// - true: if the iterator found the key in the list
+static bool Find_Node(HTKey_t key, LLIterator *iter);
+
 // Grows the hashtable (ie, increase the number of buckets) if its load
 // factor has become too high.
 static void MaybeResize(HashTable *ht);
@@ -356,8 +369,8 @@ static void MaybeResize(HashTable *ht) {
   HashTable_Free(newht, &HTNoOpFree);
 }
 
-bool Find_Node(HTKey_t key, LLIterator *iter) {
-  Varify333(iter != NULL);
+static bool Find_Node(HTKey_t key, LLIterator *iter) {
+  Verify333(iter != NULL);
   HTKeyValue_t *payload;
   while (LLIterator_IsValid(iter)) {
     LLIterator_Get(iter, (LLPayload_t *) &payload);
