@@ -45,14 +45,16 @@ static ssize_t fill_buffer(RO_FILE* file);
 // TODO: Write this function
 RO_FILE* ro_open(char* filename) {
   // 1. Allocate a new RO_FILE
-
+  RO_FILE* file = (RO_FILE *) malloc(sizeof(RO_FILE));
   // 2. Get the file descriptor for the file
-
+  file->fd = open(filename,  O_RDONLY);
   // 3. Allocate the internal buffer
-
+  file->buf = (char *) malloc(sizeof(char) * RO_FILE_BUF_LEN);
   // 4. Initialize the other fields (no reading done yet)
-
-  return NULL;
+  file->buf_index = 0;
+  file->buf_pos = 0;
+  file->buf_end = 0;
+  return file;
 }
 
 ssize_t ro_read(char* ptr, size_t len, RO_FILE* file) {
@@ -104,6 +106,9 @@ int ro_seek(RO_FILE* file, off_t offset, int whence) {
 // TODO: Write this function
 int ro_close(RO_FILE* file) {
   // Clean up all RO_FILE resources, returns non-zero on error
+  free(file->buf);
+  close(file->fd);
+  free(file);
   return 0;
 }
 
@@ -132,6 +137,6 @@ ssize_t fill_buffer(RO_FILE* file) {
   //   the buffer (i.e., it's okay to re-read them from the file).
   // - You will need to implement a POSIX read loop with all appropriate
   //   return value checking.
-
+  read(file->fd, file->buf, RO_FILE_BUF_LEN);
   return 0;
 }

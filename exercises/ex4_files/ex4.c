@@ -2,6 +2,9 @@
 #include <stdlib.h>   // for EXIT_SUCCESS, NULL
 #include <string.h>   // for strrchr, strcmp, strlen
 #include <stdbool.h>  // for bool
+#include <dirent.h> 
+#include <sys/types.h>
+#include <errno.h>
 
 #include "ro_file.h"
 
@@ -27,6 +30,37 @@ char* Concatenate(char* dirname, char* filename);
  */
 int main(int argc, char** argv) {
   // TODO: Write this function
+  if (argc != 2) {  // checks for if exactly 1 paramiter was passed in
+    fprintf(stderr, "ERROR: incorect number of inputs\n");
+    return EXIT_FAILURE;
+  }
+  errno = 0;
+  DIR *dir = opendir(argv[1]);
+  if (errno != 0) {
+    fprintf(stderr, "Incorect file path passed in\n");
+  }
+  while (dir && errno == 0) {
+    struct dirent *help = readdir(dir);
+    if (help == NULL){
+      break;
+    }
+    if (IsTxtFile(help->d_name)) {
+      FILE *file = fopen(Concatenate(argv[1], help->d_name), "r");
+      if (file == NULL) {
+        printf("wrong");
+      }
+      char buf[100];
+      while (!feof(file)) {
+        if (fgets(buf , 100 , file) == NULL) {
+          break;
+        }
+        fputs(buf, stdout);
+      }
+      fclose(file);
+    }
+  }
+  closedir(dir);
+  
   return EXIT_SUCCESS;
 }
 

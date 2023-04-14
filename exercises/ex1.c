@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
-double sumPi(int32_t);
+double SumPi(int32_t);
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {  // checks for if exactly 1 paramiter was passed in
@@ -24,11 +24,11 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "ERROR: input not a positive integer\n");
         return EXIT_FAILURE;
     }
-    printf("Our estimate of Pi is %0.20f\n", sumPi(runs));
+    printf("Our estimate of Pi is %0.20f\n", SumPi(runs));
     return EXIT_SUCCESS;
 }
 
-double sumPi(int32_t runs) {
+double SumPi(int32_t runs) {
     double pi = 3.0;  // step 0 in the infinite series
     for (int i = 1; i <= runs; i++) {
         double iteration = 4.0 / (2 * i * (2 * i + 1) * (2 * i + 2));
