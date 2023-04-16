@@ -1,12 +1,8 @@
-// Copyright 2023 Adam Klein
-// UWemail: aklein47@uw.edu
-// Name: Adam Klein
-
 #include <stdio.h>    // for snprintf
 #include <stdlib.h>   // for EXIT_SUCCESS, NULL
 #include <string.h>   // for strrchr, strcmp, strlen
 #include <stdbool.h>  // for bool
-#include <dirent.h>
+#include <dirent.h> 
 #include <sys/types.h>
 #include <errno.h>
 
@@ -14,9 +10,6 @@
 
 
 /*** HELPER FUNCTION DECLARATIONS ******************************************/
-
-// size decloration for my char*
-static const int FILE_BUF_LEN = 50;
 
 // Returns whether or not a filename ends in ".txt".
 bool IsTxtFile(char* filename);
@@ -36,6 +29,7 @@ char* Concatenate(char* dirname, char* filename);
  *   Eventually reading the files with ro_file module.
  */
 int main(int argc, char** argv) {
+  // TODO: Write this function
   if (argc != 2) {  // checks for if exactly 1 paramiter was passed in
     fprintf(stderr, "ERROR: incorect number of inputs\n");
     return EXIT_FAILURE;
@@ -46,27 +40,27 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Incorect file path passed in\n");
   }
   while (dir && errno == 0) {
-    struct dirent *file = readdir(dir);
-    if (file == NULL) {
+    struct dirent *help = readdir(dir);
+    if (help == NULL){
       break;
     }
-    if (IsTxtFile(file->d_name)) {
-      RO_FILE* txt = ro_open(Concatenate(argv[1], file->d_name));
-      if (txt == NULL) {
+    if (IsTxtFile(help->d_name)) {
+      FILE *file = fopen(Concatenate(argv[1], help->d_name), "r");
+      if (file == NULL) {
         printf("wrong");
       }
-      int check = FILE_BUF_LEN;
-      char buf[FILE_BUF_LEN + 1];
-      while (check == FILE_BUF_LEN) {
-        check = ro_read(buf, FILE_BUF_LEN, txt);
-        buf[check] = '\0';
+      char buf[100];
+      while (!feof(file)) {
+        if (fgets(buf , 100 , file) == NULL) {
+          break;
+        }
         fputs(buf, stdout);
       }
-      ro_close(txt);
+      fclose(file);
     }
   }
   closedir(dir);
-
+  
   return EXIT_SUCCESS;
 }
 
