@@ -56,8 +56,12 @@ RO_FILE* ro_open(char* filename) {
   file->fd = open(filename,  O_RDONLY);
   // 3. Allocate the internal buffer
   file->buf = (char *) malloc(sizeof(char) * RO_FILE_BUF_LEN);
+  if (file->buf == NULL) {
+    return NULL;
+  }
   // 4. Initialize the other fields (no reading done yet)
-  fill_buffer(file);
+  file->buf_end = 0;
+  file->buf_index = 0;
   file->buf_pos = 0;
   return file;
 }
@@ -98,27 +102,28 @@ off_t ro_tell(RO_FILE* file) {
 
 int ro_seek(RO_FILE* file, off_t offset, int whence) {
   // 1. Check validity of arguments, where applicable.
-  if (file == NULL) {
+  if (file == NULL ||
+     (whence != SEEK_CUR && whence != SEEK_END && whence != SEEK_SET)) {
     return 1;
   }
   // 2. Seek to specified offset from specified whence using lseek.
   //    No need to check if new position is already in our buffer.
-  errno = 0;
-  file->buf_pos = lseek(file->fd, offset, whence);
+  off_t position = lseek(file->fd, offset, whence);
   // 3. Update our buffer indicators
-  if (errno != 0) {
+  if (errno != 0 || position == -1) {
     return 1;
   }
-  fill_buffer(file);
+  file->buf_pos = position;
+  file->buf_end = 0;
   return 0;
 }
 
 int ro_close(RO_FILE* file) {
   // Clean up all RO_FILE resources, returns non-zero on error
   free(file->buf);
-  close(file->fd);
+  int close_int = close(file->fd);
   free(file);
-  return 0;
+  return close_int;
 }
 
 
@@ -148,7 +153,26 @@ ssize_t fill_buffer(RO_FILE* file) {
   //   the buffer (i.e., it's okay to re-read them from the file).
   // - You will need to implement a POSIX read loop with all appropriate
   //   return value checking.
-  ssize_t bytes_read = read(file->fd, file->buf, RO_FILE_BUF_LEN);
+  int bytes_left = RO_FILE_BUF_LEN;
+  int result;
+  ssize_t bytes_read = 0;
+  while (bytes_left > 0) {
+    result = read(file->fd, file->buf + (RO_FILE_BUF_LEN - bytes_left),
+                  bytes_left);
+    if (result == -1) {
+      if (errno != EINTR) {
+        return -1;
+      }
+      // EINTR happened, so do nothing and try again
+      continue;
+    } else if (result == 0) {
+    // EOF reached, so stop reading
+    break;
+    }
+    bytes_left -= result;
+    bytes_read += result;
+  }
+
   file->buf_end = bytes_read;
   file->buf_index = 0;
   return bytes_read;

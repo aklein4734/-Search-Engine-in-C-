@@ -53,7 +53,8 @@ int main(int argc, char** argv) {
     if (IsTxtFile(file->d_name)) {
       RO_FILE* txt = ro_open(Concatenate(argv[1], file->d_name));
       if (txt == NULL) {
-        printf("wrong");
+        fprintf(stderr, ".txt files could not be opened\n");
+        return EXIT_FAILURE;
       }
       int check = FILE_BUF_LEN;
       char buf[FILE_BUF_LEN + 1];
