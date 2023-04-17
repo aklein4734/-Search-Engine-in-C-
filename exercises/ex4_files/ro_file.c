@@ -160,7 +160,7 @@ ssize_t fill_buffer(RO_FILE* file) {
     result = read(file->fd, file->buf + (RO_FILE_BUF_LEN - bytes_left),
                   bytes_left);
     if (result == -1) {
-      if (errno != EINTR) {
+      if (errno != EINTR && errno != EAGAIN) {
         return -1;
       }
       // EINTR happened, so do nothing and try again
