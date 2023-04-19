@@ -44,8 +44,8 @@ void DocTable_Free(DocTable* table) {
 
   // STEP 1.
 
-
-
+  HashTable_Free(table->id_to_name, free);  // this might be wrong
+  HashTable_Free(table->name_to_id, free);
   free(table);
 }
 
@@ -65,7 +65,10 @@ DocID_t DocTable_Add(DocTable* table, char* doc_name) {
   // STEP 2.
   // Check to see if the document already exists.  Then make a copy of the
   // doc_name and allocate space for the new ID.
-
+  kv.key = FNVHash64(doc_name, strlen(doc_name));
+  if (HashTable_Find(table->name_to_id, kv.key, &old_kv)){
+    
+  }
 
 
   *doc_id = table->max_id;
