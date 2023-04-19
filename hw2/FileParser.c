@@ -69,24 +69,29 @@ char* ReadFileToString(const char* file_name, int* size) {
   // Use the stat system call to fetch a "struct stat" that describes
   // properties of the file. ("man 2 stat"). You can assume we're on a 64-bit
   // system, with a 64-bit off_t field.
-
+  stat(file_name, &file_stat);
 
 
   // STEP 2.
   // Make sure this is a "regular file" and not a directory or something else
   // (use the S_ISREG macro described in "man 2 stat").
-
+  if (!S_ISREG(file_stat.st_mode)) {
+    return NULL;
+  }
 
 
   // STEP 3.
   // Attempt to open the file for reading (see also "man 2 open").
-
+  fd = open(file_name, O_RDONLY);
+  if (fd == -1) {
+    return NULL;
+  }
 
 
   // STEP 4.
   // Allocate space for the file, plus 1 extra byte to
   // '\0'-terminate the string.
-
+  buf = (char *) malloc(file_stat.st_size + 1);
 
 
   // STEP 5.
@@ -99,8 +104,20 @@ char* ReadFileToString(const char* file_name, int* size) {
   // particular what the return values -1 and 0 imply.
   left_to_read = file_stat.st_size;
   while (left_to_read > 0) {
+    result = read(fd, buf + (file_stat.st_size - left_to_read),
+                  left_to_read);
+    if (result == -1) {
+      if (errno != EINTR && errno != EAGAIN) {
+        return NULL;
+      }
+      // EINTR happened, so do nothing and try again
+      continue;
+    } else if (result == 0) {
+    // EOF reached, so stop reading
+    break;
+    }
+    left_to_read -= result;
   }
-
   // Great, we're done!  We hit the end of the file and we read
   // filestat.st_size - left_to_read bytes. Close the file descriptor returned
   // by open() and return through the "size" output parameter how many bytes
@@ -171,6 +188,7 @@ void FreeWordPositionsTable(HashTable *table) {
 static void InsertContent(HashTable* tab, char* content) {
   char* cur_ptr = content;
   char* word_start = content;
+  DocPositionOffset_t pos = 0;
 
   // STEP 6.
   // This is the interesting part of Part A!
@@ -199,10 +217,20 @@ static void InsertContent(HashTable* tab, char* content) {
   // Each time you find a word that you want to record in the hashtable, call
   // AddWordPosition() helper with appropriate arguments, e.g.,
   // AddWordPosition(tab, wordstart, pos);
-
-  while (1) {
-    break;  // you may want to change this
-  }  // end while-loop
+  while (*cur_ptr != '\0') {
+    if (isalpha(*cur_ptr)) {
+      *cur_ptr = tolower(*cur_ptr);
+    } else {
+      *cur_ptr = '\0';
+      int size = cur_ptr - word_start;
+      if (size > 0) {
+        AddWordPosition(tab, word_start, pos);
+      }
+      word_start = cur_ptr + 1;
+    }
+    cur_ptr++;
+    pos++;
+  }
 }
 
 static void AddWordPosition(HashTable* tab, char* word,
@@ -233,5 +261,20 @@ static void AddWordPosition(HashTable* tab, char* word,
     // No; this is the first time we've seen this word.  Allocate and prepare
     // a new WordPositions structure, and append the new position to its list
     // using a similar ugly hack as right above.
+    wp = (WordPositions *) malloc(sizeof(WordPositions));
+    if (wp == NULL) {
+      return;
+    }
+    wp->positions = LinkedList_Allocate();
+    char* temp2 = (char *) malloc(sizeof(word));
+    for (int i = 0; i < sizeof(word); i++) { // The problem is the sting is being lost becaused its unmalloced
+      temp2[i] = word[i];
+    }
+    wp->word = temp2;
+    LinkedList_Append(wp->positions, (LLPayload_t) (int64_t) pos);
+    HTKeyValue_t* temp;
+    kv.key = hash_key;
+    kv.value = wp;
+    HashTable_Insert(tab, kv, temp);
   }
 }

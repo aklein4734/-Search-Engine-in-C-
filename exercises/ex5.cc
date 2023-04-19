@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
     int num;
     std::cout << "Which positive integer would you like me to factorize? ";
     std::cin >> num;
-    if (num <= 0) {  // sees if num is an int
-        std::cerr << "ERROR: input not a natual number (math)\n";
+    if (num <= 0) {  // sees if num is a natual number
+        std::cerr << "ERROR: input not a natual number\n";
         return EXIT_FAILURE;
     }
     for (int i = 1; i < num; i++) {

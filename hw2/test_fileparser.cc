@@ -82,6 +82,7 @@ TEST(Test_FileParser, ParseIntoWordPositionsTable) {
                              FNVHash64((unsigned char*) kW1, strlen(kW1)),
                              &kv));
   wp = static_cast<WordPositions*>(kv.value);
+  printf("%p", wp->word);
   ASSERT_STREQ(kW1, wp->word);
   ASSERT_EQ(2, LinkedList_NumElements(wp->positions));
   ASSERT_TRUE(LinkedList_Pop(wp->positions, &pos));
