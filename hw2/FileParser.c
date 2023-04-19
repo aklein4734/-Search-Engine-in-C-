@@ -92,6 +92,9 @@ char* ReadFileToString(const char* file_name, int* size) {
   // Allocate space for the file, plus 1 extra byte to
   // '\0'-terminate the string.
   buf = (char *) malloc(file_stat.st_size + 1);
+  if (buf == NULL) {
+    return NULL;
+  }
 
 
   // STEP 5.
@@ -103,6 +106,7 @@ char* ReadFileToString(const char* file_name, int* size) {
   // or a non-recoverable error.  Read the man page for read() carefully, in
   // particular what the return values -1 and 0 imply.
   left_to_read = file_stat.st_size;
+  num_read = 0;
   while (left_to_read > 0) {
     result = read(fd, buf + (file_stat.st_size - left_to_read),
                   left_to_read);
@@ -117,6 +121,10 @@ char* ReadFileToString(const char* file_name, int* size) {
     break;
     }
     left_to_read -= result;
+    num_read += result;
+  }
+  if (num_read != file_stat.st_size) {
+    return NULL;
   }
   // Great, we're done!  We hit the end of the file and we read
   // filestat.st_size - left_to_read bytes. Close the file descriptor returned
@@ -224,7 +232,7 @@ static void InsertContent(HashTable* tab, char* content) {
       *cur_ptr = '\0';
       int size = cur_ptr - word_start;
       if (size > 0) {
-        AddWordPosition(tab, word_start, pos);
+        AddWordPosition(tab, word_start, pos - size);
       }
       word_start = cur_ptr + 1;
     }
@@ -266,15 +274,15 @@ static void AddWordPosition(HashTable* tab, char* word,
       return;
     }
     wp->positions = LinkedList_Allocate();
-    char* temp2 = (char *) malloc(sizeof(word));
-    for (int i = 0; i < sizeof(word); i++) { // The problem is the sting is being lost becaused its unmalloced
-      temp2[i] = word[i];
+    int size = strlen(word);
+    char *malloc_word = (char *) malloc(size + 1);
+    for (int i = 0; i < size + 1; i++) {
+      malloc_word[i] = word[i];
     }
-    wp->word = temp2;
+    wp->word = malloc_word;
     LinkedList_Append(wp->positions, (LLPayload_t) (int64_t) pos);
-    HTKeyValue_t* temp;
     kv.key = hash_key;
     kv.value = wp;
-    HashTable_Insert(tab, kv, temp);
+    HashTable_Insert(tab, kv, NULL);
   }
 }
