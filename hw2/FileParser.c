@@ -69,7 +69,9 @@ char* ReadFileToString(const char* file_name, int* size) {
   // Use the stat system call to fetch a "struct stat" that describes
   // properties of the file. ("man 2 stat"). You can assume we're on a 64-bit
   // system, with a 64-bit off_t field.
-  stat(file_name, &file_stat);
+  if (lstat(file_name, &file_stat) == -1) {
+    return NULL;
+  }
 
 
   // STEP 2.

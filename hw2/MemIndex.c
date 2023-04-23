@@ -116,10 +116,6 @@ void MemIndex_AddPostingList(MemIndex* index, char* word, DocID_t doc_id,
     //       the "index" table).
     wp = (WordPostings *) malloc(sizeof(WordPostings));
     wp->postings = HashTable_Allocate(20);
-    //wp->word = malloc(strlen(word) + 1);
-    //for (int i = 0; i < strlen(word) + 1; i++) {
-      //wp->word[i] = word[i];
-    //}
     wp->word = word;
     mi_kv.key = key;
     mi_kv.value = wp;
@@ -159,7 +155,7 @@ void MemIndex_AddPostingList(MemIndex* index, char* word, DocID_t doc_id,
 
 LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
   LinkedList* ret_list;
-  HTKeyValue_t kv;
+  HTKeyValue_t kv, kv1;
   WordPostings* wp;
   HTKey_t key;
   int i;
@@ -176,7 +172,25 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
   // each document that matches, allocate and initialize a SearchResult
   // structure (the initial computed rank is the number of times the word
   // appears in that document).  Finally, append the SearchResult onto ret_list.
-
+  ret_list = LinkedList_Allocate();
+  key = FNVHash64((unsigned char*) query[0], strlen(query[0]));
+  if (HashTable_Find(index, key, &kv)) {
+    wp = kv.value;
+    HTIterator *itr = HTIterator_Allocate(wp->postings);
+    while (HTIterator_IsValid(itr)) {
+      HTIterator_Get(itr, &kv1);
+      SearchResult *sr = (SearchResult *) malloc(sizeof(SearchResult));
+      sr->doc_id = kv1.key;
+      sr->rank = LinkedList_NumElements(kv1.value);
+      LinkedList_Append(ret_list, sr);
+      HTIterator_Next(itr);
+    }
+    HTIterator_Free(itr);
+  }
+  if (LinkedList_NumElements(ret_list) == 0) {
+    LinkedList_Free(ret_list, (LLPayloadFreeFnPtr)free);
+    return NULL;
+  }
 
 
   // Great; we have our search results for the first query
@@ -197,7 +211,11 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
     // Look up the next query word (query[i]) in the inverted index.
     // If there are no matches, it means the overall query
     // should return no documents, so free retlist and return NULL.
-
+    key = FNVHash64((unsigned char*) query[i], strlen(query[i]));
+    if (!HashTable_Find(index, key, &kv)) {
+      LinkedList_Free(ret_list, free);
+      return NULL;
+    }
 
 
     // STEP 6.
@@ -211,10 +229,19 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
     // number of matches for the current word.
     //
     // If it isn't, we delete that docID from the search result list.
+    SearchResult *sr;
     ll_it = LLIterator_Allocate(ret_list);
     Verify333(ll_it != NULL);
     num_docs = LinkedList_NumElements(ret_list);
+    wp = kv.value;
     for (j = 0; j < num_docs; j++) {
+      LLIterator_Get(ll_it, &sr);
+      if (HashTable_Find(wp->postings, sr->doc_id, &kv1)) {
+        sr->rank += LinkedList_NumElements(kv1.value);
+        LLIterator_Next(ll_it);
+      } else {
+        LLIterator_Remove(ll_it, free);
+      }
     }
     LLIterator_Free(ll_it);
 

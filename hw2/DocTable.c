@@ -67,7 +67,7 @@ DocID_t DocTable_Add(DocTable* table, char* doc_name) {
   // Check to see if the document already exists.  Then make a copy of the
   // doc_name and allocate space for the new ID.
   key = FNVHash64((unsigned char *)doc_name, strlen(doc_name));
-  if (HashTable_Find(table->name_to_id, key, &old_kv)){
+  if (HashTable_Find(table->name_to_id, key, &old_kv)) {
     return *((DocID_t *) old_kv.value);
   }
   doc_id = (DocID_t *) malloc(sizeof(DocID_t));
@@ -109,7 +109,7 @@ DocID_t DocTable_GetDocID(DocTable* table, char* doc_name) {
   // STEP 5.
   // Try to find the passed-in doc in name_to_id table.
   key = FNVHash64((unsigned char *)doc_name, strlen(doc_name));
-  if (HashTable_Find(table->name_to_id, key, &kv)){
+  if (HashTable_Find(table->name_to_id, key, &kv)) {
     return *((DocID_t *) kv.value);
   }
 
@@ -128,7 +128,7 @@ char* DocTable_GetDocName(DocTable* table, DocID_t doc_id) {
   // and either return the string (i.e., the (char *)
   // saved in the value field for that key) or
   // NULL if the key isn't in the table.
-  if (HashTable_Find(table->id_to_name, doc_id, &kv)){
+  if (HashTable_Find(table->id_to_name, doc_id, &kv)) {
     return (char *)kv.value;
   }
 
