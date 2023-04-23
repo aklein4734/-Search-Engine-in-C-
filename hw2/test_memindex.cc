@@ -58,7 +58,7 @@ TEST(Test_MemIndex, Integration) {
                       &idx);
   ASSERT_EQ(1, res);
   ASSERT_EQ(3852, MemIndex_NumWords(idx));
-
+  
   // Process query 1, check results.
   ll_res = MemIndex_Search(idx, const_cast<char**>(q1), 1);
   ASSERT_NE((LinkedList*) NULL, ll_res);
