@@ -94,9 +94,7 @@ char* ReadFileToString(const char* file_name, int* size) {
   // Allocate space for the file, plus 1 extra byte to
   // '\0'-terminate the string.
   buf = (char *) malloc(file_stat.st_size + 1);
-  if (buf == NULL) {
-    return NULL;
-  }
+  Verify333(buf != NULL);
 
 
   // STEP 5.
@@ -272,12 +270,11 @@ static void AddWordPosition(HashTable* tab, char* word,
     // a new WordPositions structure, and append the new position to its list
     // using a similar ugly hack as right above.
     wp = (WordPositions *) malloc(sizeof(WordPositions));
-    if (wp == NULL) {
-      return;
-    }
+    Verify333(wp != NULL);
     wp->positions = LinkedList_Allocate();
     int size = strlen(word);
     char *malloc_word = (char *) malloc(size + 1);
+    Verify333(malloc_word != NULL);
     for (int i = 0; i < size + 1; i++) {
       malloc_word[i] = word[i];
     }

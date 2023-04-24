@@ -71,7 +71,9 @@ DocID_t DocTable_Add(DocTable* table, char* doc_name) {
     return *((DocID_t *) old_kv.value);
   }
   doc_id = (DocID_t *) malloc(sizeof(DocID_t));
+  Verify333(doc_id != NULL);
   doc_copy = malloc(strlen(doc_name) + 1);
+  Verify333(doc_copy != NULL);
   for (int i = 0; i <strlen(doc_name) + 1; i++) {
     doc_copy[i] = doc_name[i];
   }

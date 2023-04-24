@@ -115,6 +115,7 @@ void MemIndex_AddPostingList(MemIndex* index, char* word, DocID_t doc_id,
     //   (3) insert the the new WordPostings into the inverted index (ie, into
     //       the "index" table).
     wp = (WordPostings *) malloc(sizeof(WordPostings));
+    Verify333(wp != NULL);
     wp->postings = HashTable_Allocate(20);
     wp->word = word;
     mi_kv.key = key;
@@ -180,14 +181,14 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
     while (HTIterator_IsValid(itr)) {
       HTIterator_Get(itr, &kv1);
       SearchResult *sr = (SearchResult *) malloc(sizeof(SearchResult));
+      Verify333(sr != NULL);
       sr->doc_id = kv1.key;
       sr->rank = LinkedList_NumElements(kv1.value);
       LinkedList_Append(ret_list, sr);
       HTIterator_Next(itr);
     }
     HTIterator_Free(itr);
-  }
-  if (LinkedList_NumElements(ret_list) == 0) {
+  } else {
     LinkedList_Free(ret_list, (LLPayloadFreeFnPtr)free);
     return NULL;
   }

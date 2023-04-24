@@ -1,44 +1,46 @@
+// Copyright 2023 Adam Klein
+// Name: Adam Klein
+// UWemail: aklein47@uw.edu
+
 #include "Vector.h"
 
   Vector::Vector() {
-    this->x = 0.0;
-    this->y = 0.0;
-    this->y = 0.0;
+    this->_x = 0.0;
+    this->_y = 0.0;
+    this->_y = 0.0;
   }
-  Vector::Vector(float x, float y, float z) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
+  Vector::Vector(const float x, const float y, const float z) {
+    this->_x = x;
+    this->_y = y;
+    this->_z = z;
   }
-  Vector::Vector(Vector &v){
-    this->x = v.get_x();
-    this->y = v.get_y();
-    this->z = v.get_z();
+  Vector::Vector(const Vector &v) {
+    this->_x = v._x;
+    this->_y = v._y;
+    this->_z = v._z;
   }
-  Vector::~Vector() {
-
+  Vector& Vector::operator=(const Vector& v) {
+    if (this != &v) {
+      this->_x = v._x;
+      this->_y = v._y;
+      this->_z = v._z;
+    }
+    return *this;
   }
-  float Vector::get_x() {
-    return this->x;
+  Vector& Vector::operator+=(const Vector& v) {
+    this->_x += v._x;
+    this->_y += v._y;
+    this->_z += v._z;
+    return *this;
   }
-  float Vector::get_y() {
-    return this->y;
+    Vector& Vector::operator-=(const Vector& v) {
+    this->_x -= v._x;
+    this->_y -= v._y;
+    this->_z -= v._z;
+    return *this;
   }
-  float Vector::get_z() {
-    return this->z;
-  }
-  void Vector::Vector_set(Vector v) {
-    this->x = v.get_x();
-    this->y = v.get_y();
-    this->z = v.get_z();
-  }
-  void Vector::Vector_add(Vector v) {
-    this->x += v.get_x();
-    this->y += v.get_y();
-    this->z += v.get_z();
-  }
-  float Vector::Vector_mult(Vector v) {
-    float dot = this->x * v.get_x();
-    dot += this->y * v.get_y();
-    return dot + (this->z * v.get_z());
+  float operator*(const Vector& v1, const Vector& v2) {
+    float dot = v1.get_x() * v2.get_x();
+    dot += v1.get_y() * v2.get_y();
+    return dot + (v1.get_z() * v2.get_z());
   }

@@ -36,7 +36,19 @@ int main(int argc, char** argv) {
   if (argc != 2) {
     Usage();
   }
-
+  DocTable *table = DocTable_Allocate();
+  MemIndex *index = MemIndex_Allocate();
+  printf("Indexing '%s'\n", argv[1]);
+  if (!CrawlFileTree(argv[1], &table, &index)) {
+    return EXIT_FAILURE;
+  }
+  bool wantsQuery = true;
+  while (wantsQuery) {
+    char* str;
+    printf("enter query:\n");
+    gets(str);
+  }
+  
   // Implement searchshell!  We're giving you very few hints
   // on how to do it, so you'll need to figure out an appropriate
   // decomposition into functions as well as implementing the
