@@ -112,7 +112,8 @@ DocID_t DocTable_GetDocID(DocTable* table, char* doc_name) {
   // Try to find the passed-in doc in name_to_id table.
   key = FNVHash64((unsigned char *)doc_name, strlen(doc_name));
   if (HashTable_Find(table->name_to_id, key, &kv)) {
-    return *((DocID_t *) kv.value);
+    res = *((DocID_t *) kv.value);
+    return res;
   }
 
 

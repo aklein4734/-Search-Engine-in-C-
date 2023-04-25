@@ -193,7 +193,6 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
     return NULL;
   }
 
-
   // Great; we have our search results for the first query
   // word.  If there is only one query word, we're done!
   // Sort the result list and return it to the caller.
@@ -218,7 +217,6 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
       return NULL;
     }
 
-
     // STEP 6.
     // There are matches.  We're going to iterate through
     // the docIDs in our current search result list, testing each
@@ -236,7 +234,7 @@ LinkedList* MemIndex_Search(MemIndex* index, char* query[], int query_len) {
     num_docs = LinkedList_NumElements(ret_list);
     wp = kv.value;
     for (j = 0; j < num_docs; j++) {
-      LLIterator_Get(ll_it, &sr);
+      LLIterator_Get(ll_it, (LLPayload_t *) &sr);
       if (HashTable_Find(wp->postings, sr->doc_id, &kv1)) {
         sr->rank += LinkedList_NumElements(kv1.value);
         LLIterator_Next(ll_it);
