@@ -4,6 +4,11 @@
 
 #ifndef VECTOR_H_
 #define VECTOR_H_
+
+#include <iostream>
+
+namespace vector333 {
+
 class Vector {
  public:
   // Contructs a 3d zero Vector
@@ -43,4 +48,8 @@ Vector operator+(const Vector& v1, const Vector& v2);
 
 // Override the "-" operator.
 Vector operator-(const Vector& v1, const Vector& v2);
+
+// Override the outstream.
+std::ostream& operator<<(std::ostream& in, Vector& a);
+}  // namespace vector333
 #endif  // VECTOR_H_

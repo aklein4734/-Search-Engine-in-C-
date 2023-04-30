@@ -5,16 +5,47 @@
 #include <iostream>
 #include <cstdlib>
 
+
 #include "Vector.h"
-static bool Equals(Vector v1, Vector v2);
-static bool Test_Gets(Vector v, float x, float y, float z);
-static bool Test_add_equals(Vector v1, Vector v2, Vector v3);
-static bool Test_sub_equals(Vector v1, Vector v2, Vector v3);
-static bool Test_equals(Vector v1, Vector v2);
-static bool Test_mult(Vector v1, Vector v2);
-static bool Test_mult_const(Vector v1, Vector v2, float k);
-static void Increment(Vector v);
-static bool VerifyAdress(Vector v1, Vector *v2);
+
+// tests to see if two vectors are equal
+static bool Equals(vector333::Vector v1, vector333::Vector v2);
+
+// tests to see if the getter functions work
+static bool Test_Gets(vector333::Vector v, float x, float y, float z);
+
+// tests to see if += overide works
+static bool Test_add_equals(vector333::Vector v1,
+                            vector333::Vector v2,
+                            vector333::Vector v3);
+
+// tests to see if -= overide works
+static bool Test_sub_equals(vector333::Vector v1,
+                            vector333::Vector v2,
+                            vector333::Vector v3);
+
+// tests to see if = overide works
+static bool Test_equals(vector333::Vector v1, vector333::Vector v2);
+
+// tests to see if vector * vector works
+static bool Test_mult(vector333::Vector v1, vector333::Vector v2);
+
+// tests to see if vector * k and k * vector works
+static bool Test_mult_const(vector333::Vector v1,
+                            vector333::Vector v2, float k);
+
+// tests to see if + overide works
+static bool Test_add(vector333::Vector v1,
+                     vector333::Vector v2,
+                     vector333::Vector v3);
+
+// tests to see if - overide works
+static bool Test_sub(vector333::Vector v1,
+                     vector333::Vector v2,
+                     vector333::Vector v3);
+
+// test to see if prints work
+static bool Test_print(vector333::Vector v, float x, float y, float z);
 
 #define origin 0.0
 #define margin 0.00001
@@ -25,12 +56,13 @@ static bool VerifyAdress(Vector v1, Vector *v2);
 
 int main(int argc, char* argv[]) {
   if (argc != 1) {
-    std::cerr << "ERROR: Passed in paramiters\n";
+    std::cerr << "ERROR: Passed in paramiters" << std::endl;
     return EXIT_FAILURE;
   }
-  Vector v0 = Vector();
-  Vector v1 = Vector(x1, y1, z1);
-  Vector v2 = Vector(v1);
+  vector333::Vector v0 = vector333::Vector();
+  vector333::Vector v1 = vector333::Vector(x1, y1, z1);
+  vector333::Vector v2 = vector333::Vector(v1);
+  vector333::Vector v3 = vector333::Vector(x1 * y1, y1 * y1, z1 * y1);
   if (!Test_Gets(v1, x1, y1, z1) ||
       !Test_Gets(v0, origin, origin, origin) ||
       !Test_Gets(v2, x1, y1, z1)) {
@@ -38,24 +70,16 @@ int main(int argc, char* argv[]) {
   }
 
   if (!Test_sub_equals(v1, v2, v0) || !Test_add_equals(v0, v2, v2) ||
-      !Test_equals(v2, v1) || !Test_mult(v1, v2)) {
+      !Test_equals(v2, v1) || !Test_mult(v1, v2) ||
+      !Test_mult_const(v1, v3, y1) || !Test_add(v1, v2, v3) ||
+      !Test_sub(v3, v2, v1) || !Test_print(v1, x1, y1, z1)) {
     return EXIT_FAILURE;
   }
-  Increment(v1);
-  if (Equals(v1, v2)) {
-    std::cout << "Vector: pass-by-value\n";
-  } else {
-    std::cout << "Vector: pass-by-reference\n";
-  }
-  if (VerifyAdress(v0, &v0)) {
-    std::cout << "Ref: same address\n";
-  } else {
-    std::cout << "Ref: different address\n";
-  }
+  std::cout << "All tests Passed" << std::endl;
   return EXIT_SUCCESS;
 }
 
-static bool Equals(Vector v1, Vector v2) {
+static bool Equals(vector333::Vector v1, vector333::Vector v2) {
   if (!((v1.get_x() - v2.get_x() > -margin &&
          v1.get_x() - v2.get_x() < margin) &&
         (v1.get_y() - v2.get_y() > -margin &&
@@ -64,78 +88,102 @@ static bool Equals(Vector v1, Vector v2) {
          v1.get_z() - v2.get_z() < margin))) {
     std::cerr << "Expected: " << v1.get_x() << ", "
                               << v1.get_y() << ", "
-                              << v1.get_z() << "\n";
+                              << v1.get_z() << std::endl;
     std::cerr << "     Got: " << v2.get_x() << ", "
                               << v2.get_y() << ", "
-                              << v2.get_z() << "\n";
+                              << v2.get_z() << std::endl;
     return false;
   }
   return true;
 }
 
-static bool Test_Gets(Vector v, float x, float y, float z) {
+static bool Test_Gets(vector333::Vector v, float x, float y, float z) {
   if (!((((v.get_x() - x) > -margin) && ((v.get_x() - x) < margin)) &&
       (((v.get_y() - y) > -margin) && ((v.get_y() - y) < margin)) &&
       (((v.get_z() - z) > -margin) && ((v.get_z() - z) < margin)))) {
-    std::cerr << "ERROR: get functions failed\n";
-    std::cerr << "Expected: " << x << ", " << y << ", " << z << "\n";
+    std::cerr << "ERROR: get functions failed" << std::endl;
+    std::cerr << "Expected: " << x << ", " << y << ", " << z << std::endl;
     std::cerr << "     Got: " << v.get_x() << ", "
                               << v.get_y() << ", "
-                              << v.get_z() << "\n";
+                              << v.get_z() << std::endl;
     return false;
   }
   return true;
 }
 
-static bool Test_add_equals(Vector v1, Vector v2, Vector v3) {
+static bool Test_add_equals(vector333::Vector v1,
+                            vector333::Vector v2,
+                            vector333::Vector v3) {
   v1 += v2;
   if (!Equals(v1, v3)) {
-    std::cerr << "ERROR: '+=' override Failed\n";
+    std::cerr << "ERROR: '+=' override Failed" << std::endl;
     return false;
   }
   return true;
 }
 
-static bool Test_sub_equals(Vector v1, Vector v2, Vector v3) {
+static bool Test_sub_equals(vector333::Vector v1,
+                            vector333::Vector v2,
+                            vector333::Vector v3) {
   v1 -= v2;
   if (!Equals(v1, v3)) {
-    std::cerr << "ERROR: '-=' override Failed\n";
+    std::cerr << "ERROR: '-=' override Failed" << std::endl;
     return false;
   }
   return true;
 }
 
-static bool Test_equals(Vector v1, Vector v2) {
+static bool Test_equals(vector333::Vector v1, vector333::Vector v2) {
   v1 = v2;
   if (!Equals(v1, v2)) {
-    std::cerr << "ERROR: '=' override Failed\n";
+    std::cerr << "ERROR: '=' override Failed" << std::endl;
     return false;
   }
   return true;
 }
 
 
-static bool Test_mult(Vector v1, Vector v2) {
+static bool Test_mult(vector333::Vector v1, vector333::Vector v2) {
   if (v1 * v2 != answer) {
-    std::cerr << "ERROR: '*' override Failed\n";
+    std::cerr << "ERROR: '*' override Failed" << std::endl;
     return false;
   }
   return true;
 }
 
-static bool Test_mult_const(Vector v1, Vector v2, float k) {
-  if (Equals(v1 * k, v2)) { // need to work on this
-    std::cerr << "ERROR: '*' override Failed\n";
+static bool Test_mult_const(vector333::Vector v1,
+                            vector333::Vector v2, float k) {
+  if (!Equals(v1 * k, v2) || !Equals(v2, v1 * k)) {
+    std::cerr << "ERROR: '*' override Failed" << std::endl;
     return false;
   }
-  return true; 
+  return true;
 }
 
-static void Increment(Vector v) {
-  Vector v0 = Vector(1.0, 1.0, 1.0);
-  v += v0;
+static bool Test_add(vector333::Vector v1,
+                     vector333::Vector v2,
+                     vector333::Vector v3) {
+  if (!Equals(v1 + v2, v3)) {
+    std::cerr << "ERROR: '+' override Failed" << std::endl;
+    return false;
+  }
+  return true;
 }
 
-static bool VerifyAdress(Vector v1, Vector *v2) {
-  return &v1 == v2;
+static bool Test_sub(vector333::Vector v1,
+                     vector333::Vector v2,
+                     vector333::Vector v3) {
+  if (!Equals(v1 - v2, v3)) {
+    std::cerr << "ERROR: '+' override Failed" << std::endl;
+    return false;
+  }
+  return true;
+}
+
+static bool Test_print(vector333::Vector v, float x, float y, float z) {
+  std::cout << v << std::endl;
+  std::cout << "(" << v.get_x() <<
+              ", " << v.get_y() <<
+              ", " << v.get_z() << ")" << std::endl;
+  return true;
 }
