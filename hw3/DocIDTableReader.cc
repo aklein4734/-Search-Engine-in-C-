@@ -1,7 +1,7 @@
 /*
- * Copyright ©2023 Justin Hsia.  All rights reserved.  Permission is
+ * Copyright ©2023 Chris Thachuk.  All rights reserved.  Permission is
  * hereby granted to students registered for University of Washington
- * CSE 333 for use solely during Winter Quarter 2023 for purposes of
+ * CSE 333 for use solely during Spring Quarter 2023 for purposes of
  * the course.  No other use, copying, distribution, or modification
  * is permitted without prior written consent. Copyrights for
  * third-party components of this work must be honored.  Instructors
