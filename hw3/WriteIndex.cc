@@ -181,15 +181,24 @@ int WriteIndex(MemIndex* mi, DocTable* dt, const char* file_name) {
 
   // STEP 1.
   // Write the memindex.
-
-
+  int mi_bytes = WriteMemIndex(f, mi, cur_pos);
+  if (mi_bytes == kFailedWrite) {
+    fclose(f);
+    unlink(file_name);  // delete the file
+    return kFailedWrite;
+  }
+  cur_pos += mi_bytes;
   // STEP 2.
   // Finally, backtrack to write the index header and write it.
-
-
+  int header_bytes = WriteHeader(f, dt_bytes, mi_bytes);
+  if (header_bytes == kFailedWrite) {
+    fclose(f);
+    unlink(file_name);  // delete the file
+    return kFailedWrite;
+  }
   // Clean up and return the total amount written.
   fclose(f);
-  return cur_pos;
+  return dt_bytes + mi_bytes + header_bytes;
 }
 
 
@@ -221,6 +230,14 @@ static int WriteHeader(FILE* f, int doctable_bytes, int memidx_bytes) {
   // read from the index file using fread().
   // Seek to the start of the doctable.
   CRC32 crc;
+  char buf[128];
+  fseek(f, 0, SEEK_SET);
+  while (feof(f)) {
+    int read = fread(buf, 1, 128, f);
+    for (int i = 0; i < read; i++) {
+      crc.FoldByteIntoCRC(buf[i]);
+    }
+  }
 
 
 
