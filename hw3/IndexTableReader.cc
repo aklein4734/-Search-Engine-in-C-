@@ -56,6 +56,12 @@ DocIDTableReader* IndexTableReader::LookupWord(const string& word) const {
     // specifically, extract the "word length" field and the "docID
     // table length" fields, converting from network to host order.
     WordPostingsHeader header;
+    int check = fseek(file_, offset, SEEK_SET);
+    Verify333(check != -1);
+    check = fread(&header, sizeof(WordPostingsHeader), 1, file_);
+    Verify333(check == 1);
+    header.ToHostFormat();
+
 
 
     // If the "word length" field doesn't match the length of the word
@@ -70,6 +76,10 @@ DocIDTableReader* IndexTableReader::LookupWord(const string& word) const {
     stringstream ss;
     for (int i = 0; i < header.word_bytes; i++) {
       // STEP 2.
+      uint8_t next_char;
+
+      Verify333(fread(&next_char, sizeof(uint8_t), 1, file_) == 1);
+      ss << next_char;
 
 
     }

@@ -104,7 +104,6 @@ bool FileIndexChecker::CheckHeader() {
     cout << "since ntohl(doctable_size_) + ntohl(index_size_) == ";
     cout << "filesize - 16" << endl;
   }
-
   // Re-calculate the checksum, make sure it matches that in the header.
   cout << "    recalculating the checksum..." << endl;
   fseek(file_, kFileIndexHeaderSize, SEEK_SET);

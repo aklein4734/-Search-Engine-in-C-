@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+
 extern "C" {
   #include "./libhw1/CSE333.h"
 }
@@ -79,6 +80,55 @@ QueryProcessor::ProcessQuery(const vector<string>& query) const {
   // STEP 1.
   // (the only step in this file)
   vector<QueryProcessor::QueryResult> final_result;
+  for (int i = 0; i < array_len_; i++) {
+    int size = query.size();
+    vector<IdxQueryResult> t;
+    bool no_results = false;
+    for (int j = 0; j < size; j++) {
+      auto test = itr_array_[i]->LookupWord(query[j]);
+      if (test == nullptr) {
+        no_results = true;
+        break;
+      }
+      auto thing = test->GetDocIDList();
+      if (j == 0) {
+        for (auto doc : thing) {
+          IdxQueryResult te;
+          te.doc_id = doc.doc_id;
+          te.rank = doc.num_positions;
+          t.push_back(te);
+        } 
+      } else {
+        auto itr = t.begin();
+        while (itr != t.end()) {
+          bool check = true;
+          for (auto doc : thing) {
+            if (doc.doc_id == itr->doc_id) {
+              check = false;
+              itr->rank += doc.num_positions;
+              break;
+            }
+          }
+          if (check) {
+            itr = t.erase(itr);
+          } else {
+            itr++;
+          }
+        }
+      }
+      delete test;
+    }
+    if (!no_results) {
+      for (auto itr = t.begin(); itr < t.end(); itr++) {
+        QueryResult temp;
+        temp.rank = itr->rank;
+        string file;
+        dtr_array_[i]->LookupDocID(itr->doc_id, &file);
+        temp.document_name = file;
+        final_result.push_back(temp);
+      }
+    }
+  }
 
 
   // Sort the final results.

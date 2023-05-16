@@ -24,26 +24,29 @@ class LinkedIntList : public IntList {
   LinkedIntList() {num_elements_ = 0;}
 
   // disabling copy constuctor
-  explicit LinkedIntList(const LinkedIntList&) = delete;
+  LinkedIntList(const LinkedIntList&) = delete;
+
+  // disables = operator
+  LinkedIntList& operator=(const LinkedIntList&) = delete;
 
   // returns the amount of elements in the LinkedIntList
-  int num_elements() const {return num_elements_;}
+  int num_elements() const override {return num_elements_;}
 
   // adds a node to the front of the LinkedIntList with the payloads value
-  void Push(const int payload);
+  void Push(const int payload) override;
 
   // adds a node to the back of the LinkedIntList with the payloads value
-  void Append(const int payload);
+  void Append(const int payload) override;
 
   // removes the node at the front of the LinkedIntList and
   // returns the value through the payload_ptr and returns
   // true if a node is removed otherwise false
-  bool Pop(int* const payload_ptr);
+  bool Pop(int* const payload_ptr) override;
 
   // removes the node at the back of the LinkedIntList and
   // returns the value through the payload_ptr and returns
   // true if a node is removed otherwise false
-  bool Slice(int* const payload_ptr);
+  bool Slice(int* const payload_ptr) override;
 
 
  private:

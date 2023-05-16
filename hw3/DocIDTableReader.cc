@@ -13,6 +13,7 @@
 
 #include <list>      // for std::list
 #include <cstdio>    // for (FILE*)
+#include <iostream>//delete
 
 extern "C" {
   #include "libhw1/CSE333.h"
@@ -45,6 +46,11 @@ bool DocIDTableReader::LookupDocID(
     // STEP 1.
     // Slurp the next docid out of the current element.
     DocIDElementHeader curr_header;
+    int check = fseek(file_, curr_element, SEEK_SET);
+    Verify333(check != -1);
+    check = fread(&curr_header, sizeof(DocIDElementHeader), 1, file_);
+    Verify333(check == 1);
+    curr_header.ToHostFormat();
 
 
     // Is it a match?
@@ -54,6 +60,15 @@ bool DocIDTableReader::LookupDocID(
       // std::list<DocPositionOffset_t>.  Be sure to push in the right
       // order, adding to the end of the list as you extract
       // successive positions.
+      int positions_left = curr_header.num_positions;
+      while (positions_left > 0) {
+        u_int32_t pos;
+        check = fread(&pos, sizeof(u_int32_t), 1, file_);
+        Verify333(check == 1);
+        pos = ntohl(pos);
+        ret_val->push_front(pos);
+        positions_left--;
+      }
 
 
       // STEP 3.
@@ -80,13 +95,16 @@ list<DocIDElementHeader> DocIDTableReader::GetDocIDList() const {
     // Seek to the next BucketRecord.  The "offset_" member
     // variable stores the offset of this docid table within
     // the index file.
-
+    int check = fseek(file_, sizeof(int32_t) + offset_ + sizeof(BucketRecord) * i, SEEK_SET);
+    Verify333(check != -1);
 
     // STEP 5.
     // Read in the chain length and bucket position fields from
     // the bucket_rec.
     BucketRecord bucket_rec;
-
+    check = fread(&bucket_rec, sizeof(BucketRecord), 1, file_);
+    Verify333(check == 1);
+    bucket_rec.ToHostFormat();
 
     // Sweep through the next bucket, iterating through each
     // chain element in the bucket.
@@ -100,11 +118,18 @@ list<DocIDElementHeader> DocIDTableReader::GetDocIDList() const {
       // Read the next element position from the bucket header.
       // and seek to the element itself.
       ElementPositionRecord element_pos;
+      check = fread(&element_pos, sizeof(ElementPositionRecord), 1, file_);
+      Verify333(check == 1);
+      element_pos.ToHostFormat();
 
 
       // STEP 7.
       // Read in the docid and number of positions from the element.
       DocIDElementHeader element;
+      check = fseek(file_, element_pos.position, SEEK_SET);
+      Verify333(check != -1);
+      check = fread(&element, sizeof(DocIDElementHeader), 1, file_);
+      element.ToHostFormat();
 
 
       // Append it to our result list.

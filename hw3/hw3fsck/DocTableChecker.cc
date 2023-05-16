@@ -16,6 +16,7 @@
 #include <stdint.h>     // for uint32_t, etc.
 #include <string>
 #include <cctype>       // for isascii
+#include <iostream>//delete
 
 extern "C" {
   #include "../libhw2/DocTable.h"

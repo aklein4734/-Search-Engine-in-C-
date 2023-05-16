@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright ©2023 Chris Thachuk.  All rights reserved.  Permission is
  * hereby granted to students registered for University of Washington
  * CSE 333 for use solely during Spring Quarter 2023 for purposes of
@@ -14,6 +14,7 @@
 #include <sys/types.h>  // for stat()
 #include <sys/stat.h>   // for stat()
 #include <unistd.h>     // for stat()
+#include <iostream>//delete
 
 extern "C" {
   #include "libhw1/CSE333.h"
@@ -35,15 +36,17 @@ FileIndexReader::FileIndexReader(const string& file_name,
 
   // STEP 1.
   // Make the (FILE*) be unbuffered.  ("man setbuf")
-
+  setvbuf(file_, nullptr, _IONBF, 0);
 
   // STEP 2.
   // Read the entire file header and convert to host format.
-
+  int check = fread(&header_, sizeof(IndexFileHeader), 1, file_);
+  Verify333(check == 1);
+  header_.ToHostFormat();
 
   // STEP 3.
   // Verify that the magic number is correct.  Crash if not.
-
+  Verify333(header_.magic_number == kMagicNumber);
 
   // Make sure the index file's length lines up with the header fields.
   struct stat f_stat;
@@ -68,6 +71,12 @@ FileIndexReader::FileIndexReader(const string& file_name,
       // You should only need to modify code inside the while loop for
       // this step. Remember that file_ is now unbuffered, so care needs
       // to be put into how the file is sequentially read
+      int check = fread(&buf, sizeof(char), kBufSize, file_);
+      Verify333(check != -1);
+      for (int i = 0; i < check; i++) {
+        crc_obj.FoldByteIntoCRC(buf[i]);
+      }
+      left_to_read -= check;
     }
     Verify333(crc_obj.GetFinalCRC() == header_.checksum);
   }
