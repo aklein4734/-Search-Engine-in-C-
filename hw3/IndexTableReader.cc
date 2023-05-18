@@ -80,8 +80,6 @@ DocIDTableReader* IndexTableReader::LookupWord(const string& word) const {
 
       Verify333(fread(&next_char, sizeof(uint8_t), 1, file_) == 1);
       ss << next_char;
-
-
     }
 
     // Use ss.str() to extract a std::string from the stringstream,
@@ -95,7 +93,7 @@ DocIDTableReader* IndexTableReader::LookupWord(const string& word) const {
       // DocIDTableReader to have its own (FILE*) handle
       //
       // return the new'd (DocIDTableReader*) to the caller.
-      IndexFileOffset_t docIDTableOffset = 
+      IndexFileOffset_t docIDTableOffset =
           offset + sizeof(WordPostingsHeader) + header.word_bytes;
       DocIDTableReader* ditr =
           new DocIDTableReader(FileDup(file_), docIDTableOffset);

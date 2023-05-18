@@ -13,7 +13,6 @@
 
 #include <cstdio>    // for (FILE*).
 #include <cstring>   // for strlen(), etc.
-#include <iostream>//delete
 
 // We need to peek inside the implementation of a HashTable so
 // that we can iterate through its buckets and their chain elements.
@@ -29,7 +28,7 @@ namespace hw3 {
 // Helper function declarations and constants
 
 static constexpr int kFailedWrite = -1;
-static const int buf_size = 128;
+
 
 // Helper function to write the docID --> filename mapping from the
 // DocTable `dt` into file `f`, starting at byte offset `offset`.
@@ -37,7 +36,7 @@ static const int buf_size = 128;
 static int WriteDocTable(FILE* f, DocTable* dt, IndexFileOffset_t offset);
 
 // Helper function to write the MemIndex `mi` into file `f`, starting
-// at byte offset `offset`. 
+// at byte offset `offset`.
 // Returns the size of the written MemIndex or a negative value on error.
 static int WriteMemIndex(FILE* f, MemIndex* mi, IndexFileOffset_t offset);
 
@@ -232,10 +231,11 @@ static int WriteHeader(FILE* f, int doctable_bytes, int memidx_bytes) {
   // read from the index file using fread().
   // Seek to the start of the doctable.
   CRC32 crc;
-  char buf[buf_size];
+  static constexpr int kBuf_size = 128;
+  char buf[kBuf_size];
   fseek(f, sizeof(IndexFileHeader), SEEK_SET);
   while (!feof(f)) {
-    int read = fread(&buf, sizeof(char), buf_size, f);
+    int read = fread(&buf, sizeof(char), kBuf_size, f);
     for (int i = 0; i < read; i++) {
       crc.FoldByteIntoCRC(buf[i]);
     }
@@ -296,7 +296,8 @@ static int WriteHashTable(FILE* f, IndexFileOffset_t offset, HashTable* ht,
   for (int i = 0; i < ht->num_buckets; i++) {
     // STEP 4.
     LinkedList *list = ht->buckets[i];
-    int check = WriteHTBucketRecord(f, record_pos, LinkedList_NumElements(list), bucket_pos);
+    int check = WriteHTBucketRecord(f, record_pos, LinkedList_NumElements(list),
+                                    bucket_pos);
     if (check == kFailedWrite) {
       return kFailedWrite;
     }
@@ -432,7 +433,7 @@ static int WriteDocidToDocnameFn(FILE* f, IndexFileOffset_t offset,
 
   // STEP 11.
   // calculate and return the total amount written.
-  return file_name_bytes + sizeof(DoctableElementHeader);  // you may want to change this
+  return file_name_bytes + sizeof(DoctableElementHeader);
 }
 
 // This write_element_fn is used to write a DocID + position list
@@ -484,7 +485,8 @@ static int WriteDocIDToPositionListFn(FILE* f,
 
   // STEP 15.
   // Calculate and return the total amount of data written.
-  return (sizeof(DocPositionOffset_t) * num_positions) + sizeof(DocIDElementHeader);  // you may want to change this
+  return (sizeof(DocPositionOffset_t) * num_positions) +
+          sizeof(DocIDElementHeader);
 }
 
 // This write_element_fn is used to write a WordPostings
@@ -535,6 +537,6 @@ static int WriteWordToPostingsFn(FILE* f,
 
   // STEP 19.
   // Calculate and return the total amount of data written.
-  return word_bytes + sizeof(WordPostingsHeader) + ht_bytes;  // you may want to change this
+  return word_bytes + sizeof(WordPostingsHeader) + ht_bytes;
 }
 }  // namespace hw3

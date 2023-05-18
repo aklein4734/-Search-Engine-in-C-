@@ -97,7 +97,7 @@ QueryProcessor::ProcessQuery(const vector<string>& query) const {
           te.doc_id = doc.doc_id;
           te.rank = doc.num_positions;
           t.push_back(te);
-        } 
+        }
       } else {
         auto itr = t.begin();
         while (itr != t.end()) {

@@ -11,7 +11,6 @@
 
 #include <stdint.h>     // for uint32_t, etc.
 #include <sstream>      // for std::stringstream
-#include <iostream>//delete
 
 #include "./DocTableReader.h"
 

@@ -13,7 +13,6 @@
 
 #include <list>      // for std::list
 #include <cstdio>    // for (FILE*)
-#include <iostream>//delete
 
 extern "C" {
   #include "libhw1/CSE333.h"
@@ -95,7 +94,8 @@ list<DocIDElementHeader> DocIDTableReader::GetDocIDList() const {
     // Seek to the next BucketRecord.  The "offset_" member
     // variable stores the offset of this docid table within
     // the index file.
-    int check = fseek(file_, sizeof(int32_t) + offset_ + sizeof(BucketRecord) * i, SEEK_SET);
+    int check = fseek(file_,
+      sizeof(int32_t) + offset_ + sizeof(BucketRecord) * i, SEEK_SET);
     Verify333(check != -1);
 
     // STEP 5.

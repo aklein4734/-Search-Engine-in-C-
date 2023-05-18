@@ -11,6 +11,7 @@
 
 #include <cstdlib>    // for EXIT_SUCCESS, EXIT_FAILURE
 #include <iostream>   // for std::cout, std::cerr, etc.
+#include <sstream>    // for std::stringstream
 
 #include "./QueryProcessor.h"
 
@@ -82,11 +83,39 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     Usage(argv[0]);
   }
+  list<string> index_list;
+  for (int i = 1; i < argc; i++) {
+    index_list.push_back(argv[i]);
+  }
+  hw3::QueryProcessor q = hw3::QueryProcessor(index_list);
 
   // STEP 1:
   // Implement filesearchshell!
   // Probably want to write some helper methods ...
-  while (1) { }
+  while (!std::cin.eof()) {
+    std::cout << "Enter query:" << std::endl;
+    string temp;
+    std::getline(std::cin, temp);
+    std::stringstream ss(temp);
+    vector<string> query;
+    while (ss.good()) {
+      string str;
+      ss >> str;
+      for (int i = 0; i < static_cast<int>(str.length()); i++) {
+        str[i] =tolower(str[i]);
+      }
+      query.push_back(str);
+    }
+    if (query.size() > 0) {
+      auto final_result = q.ProcessQuery(query);
+      for (hw3::QueryProcessor::QueryResult result : final_result) {
+        std::cout << "  " << result.document_name << " (" <<
+                  result.rank << ")" << std::endl;
+      }
+    } else {
+      std::cout << "  [no results]" << std::endl;
+    }
+  }
 
   return EXIT_SUCCESS;
 }
