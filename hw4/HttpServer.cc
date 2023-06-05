@@ -134,8 +134,16 @@ static void HttpServer_ThrFn(ThreadPool::Task* t) {
 
   // STEP 1:
   bool done = false;
+  HttpConnection server = HttpConnection(hst->client_fd);
   while (!done) {
-    done = true;  // you may want to change this value
+    HttpRequest request;
+    server.GetNextRequest(&request);
+    HttpResponse response = ProcessRequest(request, hst->base_dir,
+                                          *hst->indices);
+    server.WriteResponse(response);
+    if (request.GetHeaderValue("connection").compare("close")) {
+      done = true;  // you may want to change this value
+    }
   }
 }
 
@@ -179,12 +187,47 @@ static HttpResponse ProcessFileRequest(const string& uri,
   // be sure to set the response code, protocol, and message
   // in the HttpResponse as well.
   string file_name = "";
+  ret.set_protocol("HTTP/1.1");
 
   // STEP 2:
-
-
+  URLParser url_parser = URLParser();
+  file_name = uri.substr(8);
+  string url = URIDecode(file_name);
+  url_parser.Parse(url);
+  /*if (!IsPathSafe(base_dir, url_parser.path())) {
+    return false;
+  }*/
+  FileReader read = FileReader(base_dir.substr(0, base_dir.size() - 1),
+                              url_parser.path());
+  string contents = "";
+  read.ReadFile(&contents);
+  ret.AppendToBody(contents);
+  string::size_type location = contents.find_last_of(".");
+  if (location != string::npos) {
+    ret.set_response_code(200);
+    string file_type = contents.substr(location);
+    if (file_type.compare(".html") || file_type.compare(".htm")) {
+      ret.set_content_type("text/html");
+      return ret;
+    } else if (file_type.compare(".jpeg") || file_type.compare(".jpg")) {
+      ret.set_content_type("image/jpeg");
+      return ret;
+    } else if (file_type.compare(".png")) {
+      ret.set_content_type("image/png");
+      return ret;
+    } else if (file_type.compare(".txt")) {
+      ret.set_content_type("text/txt");
+    } else if (file_type.compare(".js")) {
+      ret.set_content_type("text/js");
+    } else if (file_type.compare(".css")) {
+      ret.set_content_type("text/css");
+    } else if (file_type.compare(".xml")) {
+      ret.set_content_type("text/xml");
+    } else if (file_type.compare(".gif")) {
+      ret.set_content_type("image/gif");
+    }
+  }
   // If you couldn't find the file, return an HTTP 404 error.
-  ret.set_protocol("HTTP/1.1");
   ret.set_response_code(404);
   ret.set_message("Not Found");
   ret.AppendToBody("<html><body>Couldn't find file \""
@@ -219,7 +262,7 @@ static HttpResponse ProcessQueryRequest(const string& uri,
   //    tags!)
 
   // STEP 3:
-
+  ret.AppendToBody(kThreegleStr);
   return ret;
 }
 

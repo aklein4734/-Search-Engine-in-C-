@@ -47,8 +47,25 @@ bool HttpConnection::GetNextRequest(HttpRequest* const request) {
   // next time the caller invokes GetNextRequest()!
 
   // STEP 1:
-
-
+  unsigned char buf[20];
+  int size = 1;
+  while (size != 0) {
+    size = WrappedRead(fd_, buf, 20);
+    if (size == -1) {
+      if (errno != EINTR && errno != EAGAIN) {
+        return false;
+      }
+      // EINTR happened, so do nothing and try again
+      continue;
+    }
+    buffer_.append(reinterpret_cast<char *>(buf), size);
+    const string::size_type check = buffer_.find(kHeaderEnd);
+    if (check != string::npos) {
+      *request = ParseRequest(buffer_.substr(0, check));
+      buffer_ = buffer_.substr(check + kHeaderEndLen);
+      return true;
+    }
+  }
   return false;  // You may want to change this.
 }
 
@@ -82,7 +99,18 @@ HttpRequest HttpConnection::ParseRequest(const string& request) const {
   // Note: If a header is malformed, skip that line.
 
   // STEP 2:
-
+  vector<string> result;
+  boost::split(result, request, boost::is_any_of("\r\n"));
+  vector<string> first;
+  boost::split(first, result[0], boost::is_any_of(" "));
+  req.set_uri(first[1]);
+  for (unsigned int i = 1; i < result.size(); i++) {
+    const uint64_t t = result[i].find(": ");
+    if (t != string::npos) {
+      boost::algorithm::to_lower(result[i]);
+      req.AddHeader(result[i].substr(0, t), result[i].substr(t + 2));
+    }
+  }
 
   return req;
 }

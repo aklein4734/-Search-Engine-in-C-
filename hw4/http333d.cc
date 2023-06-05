@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <iostream>
 #include <list>
+#include <cstring>
 
 #include "./ServerSocket.h"
 #include "./HttpServer.h"
@@ -30,7 +31,7 @@ using std::list;
 using std::string;
 
 // Print out program usage, and exit() with EXIT_FAILURE.
-static void Usage(char* prog_name);
+static void Usage(string prog_name);
 
 // Parse command-line arguments to get port, path, and indices to use
 // for your http333d server.
@@ -83,7 +84,7 @@ int main(int argc, char** argv) {
 }
 
 
-static void Usage(char* prog_name) {
+static void Usage(string prog_name) {
   cerr << "Usage: " << prog_name << " port staticfiles_directory indices+";
   cerr << endl;
   exit(EXIT_FAILURE);
@@ -99,7 +100,35 @@ static void GetPortAndPath(int argc,
   // - The port number is reasonable
   // - The path (i.e., argv[2]) is a readable directory
   // - You have at least 1 index, and all indices are readable files
-
+  if (argc <= 3) {
+    Usage("too little arguments");
+  }
+  char* end;
+  int32_t runs = strtol(argv[1], &end, 10);
+  if (end - argv[1] != strlen(argv[1])) {  // sees if argv[1] is an int
+    Usage("");
+  }
+  *port = runs;
+  if (*port == 0) {
+    Usage("The port number is reasonable");
+  }
+  struct stat st;
+  if (stat(argv[2], &st) != 0) {
+    Usage("not a readable directory");
+  }
+  if (!(st.st_mode & S_IFDIR)) {
+    Usage("not a readable directory");
+  }
+  *path = argv[2];
+  for (int i = 3; i < argc; i++) {
+    if (stat(argv[i], &st) != 0) {
+      Usage("not a readable file");
+    }
+    if (!(st.st_mode & S_IFREG)) {
+      Usage("not a readable file");
+    }
+    indices->push_back(argv[i]);
+  }
   // STEP 1:
 }
 

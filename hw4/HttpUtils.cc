@@ -53,9 +53,14 @@ bool IsPathSafe(const string& root_dir, const string& test_file) {
   // path of a file.)
 
   // STEP 1
-
-
-  return true;  // You may want to change this.
+  char see[PATH_MAX];
+  char *check = realpath(test_file.c_str(), see);
+  if (check == NULL) {
+    return false;
+  }
+  string test = see;
+  const string::size_type t = test.find(root_dir + "/");
+  return t != string::npos;
 }
 
 string EscapeHtml(const string& from) {
@@ -69,6 +74,11 @@ string EscapeHtml(const string& from) {
   // looked up online.
 
   // STEP 2
+  boost::replace_all(ret, "&", "&amp;");
+  boost::replace_all(ret, "\"", "&quot;");
+  boost::replace_all(ret, "'", "&apos;");
+  boost::replace_all(ret, "<", "&lt;");
+  boost::replace_all(ret, ">", "&gt;");
 
 
   return ret;

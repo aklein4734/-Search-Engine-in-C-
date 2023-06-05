@@ -10,8 +10,8 @@
  */
 
 #include <iostream>
-#include <thread>
-#include <chrono>
+#include <thread>  // NOLINT [build/c++11]
+#include <chrono>  // NOLINT [build/c++11]
 #include <cstdlib>
 #include <string>
 #include <ctime>
@@ -67,13 +67,40 @@ void consumer() {
   }
 }
 
+// start routine for producer
+void* producer_main(void * str) {
+  producer(*reinterpret_cast<string *>(str));
+  return nullptr;
+}
+
+// start routine for consumer
+void* consumer_main(void * str) {
+  consumer();
+  return nullptr;
+}
+
 int main(int argc, char** argv) {
   pthread_mutex_init(&write_lock, nullptr);
   // Your task: Make the two producers and the single consumer
   // all run concurrently (hint: use pthreads)
-  producer("piroshki");
-  producer("nalysnyky");
-  consumer();
+  pthread_t thrds[3];
+  string piroshki = "piroshki";
+  string nalysnyky = "nalysnyky";
+  if (pthread_create(&thrds[0], nullptr, &producer_main, &piroshki) != 0) {
+    std::cerr << "pthread_create failed" << endl;
+  }
+  if (pthread_create(&thrds[1], nullptr, &producer_main, &nalysnyky) != 0) {
+    std::cerr << "pthread_create failed" << endl;
+  }
+  if (pthread_create(&thrds[2], nullptr, &consumer_main, nullptr) != 0) {
+    std::cerr << "pthread_create failed" << endl;
+  }
+  for (int i = 0; i < 3; i++) {
+    if (pthread_join(thrds[i], nullptr) != 0) {
+      std::cerr << "pthread_join failed" << endl;
+    }
+  }
+
 
   pthread_mutex_destroy(&write_lock);
   return EXIT_SUCCESS;

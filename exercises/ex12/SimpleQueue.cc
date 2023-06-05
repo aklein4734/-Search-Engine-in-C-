@@ -20,16 +20,17 @@ SimpleQueue::SimpleQueue() {
   this->size_ = 0;
   this->front_.reset();
   this->end_.reset();
+  pthread_mutex_init(&this->lock, nullptr);
 }
 
 SimpleQueue::~SimpleQueue() {
-
 }
 
 void SimpleQueue::Enqueue(const string& item) {
   shared_ptr<Node> new_node(new Node());
   new_node->next.reset();
   new_node->item = item;
+  pthread_mutex_lock(&this->lock);
   if (this->end_) {
     this->end_->next = new_node;
   } else  {
@@ -37,12 +38,14 @@ void SimpleQueue::Enqueue(const string& item) {
   }
   this->end_ = new_node;
   this->size_++;
+  pthread_mutex_unlock(&this->lock);
 }
 
 bool SimpleQueue::Dequeue(string* const result) {
   if (this->size_ == 0) {
     return false;
   }
+  pthread_mutex_lock(&this->lock);
   *result = this->front_->item;
   if (this->end_ == this->front_) {
     this->end_ = this->front_ = this->front_->next;
@@ -50,6 +53,7 @@ bool SimpleQueue::Dequeue(string* const result) {
     this->front_ = this->front_->next;
   }
   this->size_--;
+  pthread_mutex_unlock(&this->lock);
   return true;
 }
 
